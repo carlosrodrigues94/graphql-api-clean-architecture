@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { Args, Mutation, Query, Resolver } from "type-graphql";
+import { Args, Authorized, Mutation, Query, Resolver } from "type-graphql";
 import { FindManyUsersUseCaseFactory } from "@/presentation/factories/find-many-users-usecase.factory";
 import { TYPES } from "@/presentation/factories/types";
 import {
@@ -15,6 +15,8 @@ export class UsersResolver {
     @inject(TYPES.FindManyUsersUseCaseFactory)
     private readonly findManyUsersUseCaseFactory: FindManyUsersUseCaseFactory
   ) {}
+
+  @Authorized(["ADMIN", "MANAGER"])
   @Query((_returns) => PaginatedUsersDTO)
   async users(@Args() { registerStatus, ...rest }: QueryUsersArgs) {
     const usecase = this.findManyUsersUseCaseFactory.build();
