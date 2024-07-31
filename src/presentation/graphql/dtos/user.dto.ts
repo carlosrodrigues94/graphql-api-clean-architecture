@@ -5,11 +5,17 @@ import { PaginationDTO } from "@/presentation/graphql/dtos/pagination.dto";
 
 @ObjectType()
 export class UserDTO implements UserEntity {
+  @Field((_type) => String)
+  password: string;
+
   @Field((_type) => ID)
   userId: string;
 
   @Field((_type) => String)
   userName: string;
+
+  @Field((_type) => String)
+  email: string;
 
   @Field((_type) => String)
   createdAt: string;
@@ -22,9 +28,6 @@ export class UserDTO implements UserEntity {
 
   @Field((_type) => String, { nullable: true })
   deletedAt: string;
-
-  //   @Field((type) => [String])
-  //   ingredients: string[];
 }
 
 @ObjectType()

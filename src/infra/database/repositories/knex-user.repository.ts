@@ -1,29 +1,24 @@
+import {
+  Pagination,
+  ResultWithPagination,
+} from "@/app/contracts/common/pagination";
+import { CreateUserRepository } from "@/app/contracts/repositories/create-user.repository";
+import { FindManyUsersWithAvatarRepository } from "@/app/contracts/repositories/find-many-users-with-avatar.repository";
+import { FindManyUsersRepository } from "@/app/contracts/repositories/find-many-users.repository";
+import { FindOneUserRepository } from "@/app/contracts/repositories/find-one-user.repository";
+import { AvatarEntity } from "@/domain/entities/avatar.entity";
 import { UserEntity } from "@/domain/entities/user.entity";
 import { Knex } from "knex";
 import { injectable } from "tsyringe";
 
-interface ResultWithPagination<R> {
-  result: R;
-  pagination: Pagination & { total: number };
-}
-
-export abstract class UserRepository {
-  abstract findMany(params: {
-    where: Partial<UserEntity>;
-    pagination: Pagination;
-  }): Promise<ResultWithPagination<UserEntity[]>>;
-
-  abstract toCamelCase(data: Record<string, any>): UserEntity;
-  abstract toSnakeCase(data: Record<string, any>): Record<string, any>;
-}
-
-export interface Pagination {
-  limit: number;
-  offset: number;
-}
-
 @injectable()
-export class KnexUserRepository implements UserRepository {
+export class KnexUserRepository
+  implements
+    FindManyUsersRepository,
+    FindManyUsersWithAvatarRepository,
+    CreateUserRepository,
+    FindOneUserRepository
+{
   private client: Knex<any, any>;
 
   constructor(
@@ -34,6 +29,28 @@ export class KnexUserRepository implements UserRepository {
       this.client = this.knexFunction(this.knexConfig);
     }
   }
+  async createUser(data: UserEntity): Promise<UserEntity> {
+    const params = this.sanitizeObject(this.toSnakeCase(data));
+    const [record] = await this.client
+      .table("users")
+      .insert(params)
+      .returning("*");
+
+    return this.removeObjectKeys(record, ["password"]) as UserEntity;
+  }
+  async findOne(
+    where: Partial<Omit<UserEntity, "userId">>
+  ): Promise<UserEntity> {
+    const data = this.sanitizeObject(this.toSnakeCase(where));
+    const record = await this.client
+      .select("*")
+      .from("users")
+      .where(data)
+      .first();
+
+    return record;
+  }
+
   async findMany(params: {
     where: Partial<UserEntity>;
     pagination: Pagination;
@@ -58,20 +75,67 @@ export class KnexUserRepository implements UserRepository {
     };
   }
 
-  toSnakeCase(data: Record<string, any>) {
-    const result = { register_status: data.registerStatus };
+  async findManyWithAvatar(params: { pagination: Pagination }) {
+    const { pagination } = params;
+    const columns = [
+      "users.*",
+      "users_avatars.url",
+      "users_avatars.avatar_id",
+      "users_avatars.created_at as avatar_created_at",
+      "users_avatars.updated_at as avatar_updated_at",
+      "users_avatars.deleted_at as avatar_deleted_at",
+    ];
 
-    const sanitized = Object.entries(result)
-      .map(([key, value]) => {
-        if (!value) return null;
-        return { [key]: value };
-      })
-      .filter(Boolean)
-      .reduce((prev, acc) => {
-        return { ...prev, ...acc };
-      }, {});
+    const [{ count }] = await this.client.count("*").from("users");
 
-    return sanitized;
+    const total = Number(count);
+    const records = await this.client
+      .select(columns)
+      .from("users")
+      .join("users_avatars", "users.user_id", "users_avatars.user_uuid")
+      .offset(pagination.offset)
+      .limit(pagination.limit)
+      .catch((err) => {
+        console.log(err);
+        return [];
+      });
+
+    const result = records.map((record) => {
+      return {
+        user: new UserEntity(this.toCamelCase(record)),
+        avatar: new AvatarEntity({
+          avatarId: record.avatar_id,
+          userUuid: record.user_uuid,
+          createdAt: record.avatar_created_at,
+          updatedAt: record.avatar_updated_at,
+          deletedAt: record.avatar_deleted_at,
+          url: record.url,
+        }),
+      };
+    });
+
+    return {
+      result,
+      pagination: {
+        ...pagination,
+        total,
+      },
+    };
+  }
+
+  toSnakeCase(data: Partial<UserEntity>) {
+    const result = {
+      register_status: data.registerStatus,
+      email: data.email,
+      created_at: data.createdAt,
+      updated_at: data.updatedAt,
+      deleted_at: data.deletedAt,
+      user_name: data.userName,
+      user_id: data.userId,
+      password: data.password,
+    };
+
+    return result;
   }
 
   toCamelCase(data: Record<string, any>): UserEntity {
@@ -82,7 +146,37 @@ export class KnexUserRepository implements UserRepository {
       updatedAt: data.updated_at,
       userId: data.user_id,
       userName: data.user_name,
+      email: data.email,
+      password: data.password,
     });
+  }
+
+  private removeObjectKeys(data: Record<string, any>, keys: string[]) {
+    const sanitized = Object.entries(data)
+      .map(([key, value]) => {
+        if (keys.includes(key)) return null;
+        return { [key]: value };
+      })
+      .filter(Boolean)
+      .reduce((prev, acc) => {
+        return { ...prev, ...acc };
+      }, {});
+
+    return sanitized;
+  }
+
+  private sanitizeObject(data: Record<string, any>) {
+    const sanitized = Object.entries(data)
+      .map(([key, value]) => {
+        if (!value) return null;
+        return { [key]: value };
+      })
+      .filter(Boolean)
+      .reduce((prev, acc) => {
+        return { ...prev, ...acc };
+      }, {});
+
+    return sanitized;
   }
 
   private validatePagination(pagination: Pagination): Pagination {

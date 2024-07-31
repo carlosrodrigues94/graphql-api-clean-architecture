@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { Args, Authorized, Mutation, Query, Resolver } from "type-graphql";
+import { Args, Authorized, Query, Resolver } from "type-graphql";
 import { FindManyUsersUseCaseFactory } from "@/presentation/factories/find-many-users-usecase.factory";
 import { TYPES } from "@/presentation/factories/types";
 import {
@@ -26,20 +26,5 @@ export class UsersResolver {
     });
 
     return { result: users, pagination };
-  }
-
-  @Mutation((returns) => UserDTO)
-  //  @Authorized()
-  addRecipe(): //  @Arg("newRecipeData") newRecipeData: NewRecipeInput,
-  //  @Ctx("user") user: User
-  Promise<UserDTO> {
-    return Promise.resolve({
-      createdAt: new Date().toUTCString(),
-      updatedAt: null,
-      deletedAt: null,
-      userName: "John Doe",
-      registerStatus: "UPDATED",
-      userId: "123456",
-    } as UserDTO);
   }
 }

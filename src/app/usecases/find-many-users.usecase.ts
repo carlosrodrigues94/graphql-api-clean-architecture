@@ -1,12 +1,7 @@
 import { UserEntity } from "@/domain/entities/user.entity";
-import {
-  Pagination,
-  UserRepository,
-} from "@/infra/database/repositories/knex-user.repository";
-
-export abstract class UseCase<P, R> {
-  abstract execute(data: P): Promise<R>;
-}
+import { UseCase } from "@/app/contracts/usecase";
+import { FindManyUsersRepository } from "@/app/contracts/repositories/find-many-users.repository";
+import { Pagination } from "../contracts/common/pagination";
 
 type FindManyUsersUseCaseParams = {
   data: Partial<UserEntity>;
@@ -21,7 +16,7 @@ interface FindManyUsersUseCaseResult {
 export class FindManyUsersUseCase
   implements UseCase<FindManyUsersUseCaseParams, FindManyUsersUseCaseResult>
 {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(private readonly userRepository: FindManyUsersRepository) {}
   async execute(
     params: FindManyUsersUseCaseParams
   ): Promise<FindManyUsersUseCaseResult> {

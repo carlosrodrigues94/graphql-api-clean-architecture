@@ -15,7 +15,11 @@ type PaginationDTO {
 }
 
 type Query {
-  users(limit: Int! = 1, offset: Int!, registerStatus: String): PaginatedUsersDTO!
+  users(
+    limit: Int! = 1
+    offset: Int!
+    registerStatus: String
+  ): PaginatedUsersDTO!
 }
 
 type UserDTO {

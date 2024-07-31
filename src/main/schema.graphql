@@ -3,8 +3,18 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type AvatarDTO {
+  avatarId: ID!
+  createdAt: String!
+  deletedAt: String
+  updatedAt: String
+  url: String!
+  userUuid: String!
+}
+
 type Mutation {
-  addRecipe: UserDTO!
+  createUser(email: String!, name: String!, password: String!): UserDTO!
+  signIn(email: String!, password: String!): SignInDTO!
 }
 
 type PaginatedUsersDTO {
@@ -18,13 +28,38 @@ type PaginationDTO {
   total: Int!
 }
 
+type PublicUsersDTO {
+  pagination: PaginationDTO!
+  result: [UserWithAvatarDTO!]!
+}
+
 type Query {
+  publicUsers: PublicUsersDTO!
   users(limit: Int! = 1, offset: Int!, registerStatus: String): PaginatedUsersDTO!
+}
+
+type SignInDTO {
+  email: String!
+  token: String!
 }
 
 type UserDTO {
   createdAt: String!
   deletedAt: String
+  email: String!
+  password: String!
+  registerStatus: String!
+  updatedAt: String
+  userId: ID!
+  userName: String!
+}
+
+type UserWithAvatarDTO {
+  avatar: AvatarDTO!
+  createdAt: String!
+  deletedAt: String
+  email: String!
+  password: String!
   registerStatus: String!
   updatedAt: String
   userId: ID!

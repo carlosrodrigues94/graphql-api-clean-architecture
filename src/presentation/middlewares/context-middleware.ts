@@ -19,7 +19,7 @@ export class ContextMiddleware {
     req: IncomingMessage;
   }): Promise<{ user: Record<string, any> | null }> {
     const token = params.req.headers.authorization || "";
-    if (!token) {
+    if (!token || !token.includes("Bearer")) {
       return {
         user: null,
       };
