@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { UserEntity } from "@/domain/entities/user.entity";
 import { Field, ID, ObjectType } from "type-graphql";
 import { PaginationDTO } from "@/presentation/graphql/dtos/pagination.dto";
+import { AvatarDTO } from "./avatar.dto";
 
 @ObjectType()
 export class UserDTO implements UserEntity {
@@ -28,6 +29,9 @@ export class UserDTO implements UserEntity {
 
   @Field((_type) => String, { nullable: true })
   deletedAt: string;
+
+  @Field((_type) => AvatarDTO)
+  avatar?: AvatarDTO;
 }
 
 @ObjectType()

@@ -23,6 +23,7 @@ export class FindManyUsersUseCase
     const { result, pagination } = await this.userRepository.findMany({
       pagination: params.pagination,
       where: params.data,
+      include: ["avatar"],
     });
 
     return { users: result, pagination };

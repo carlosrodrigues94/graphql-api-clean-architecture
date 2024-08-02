@@ -4,6 +4,7 @@ import { UniqueIdService } from "@/app/contracts/services/unique-id.service";
 import { HashService } from "@/app/contracts/services/hash.service";
 import { FindOneUserRepository } from "@/app/contracts/repositories/find-one-user.repository";
 import { UseCase } from "@/app/contracts/usecase";
+import { ApplicationException } from "../errors/application-error";
 
 export type CreateUserUseCaseParams = {
   name: string;
@@ -27,7 +28,7 @@ export class CreateUserUseCase
     const userAlreadyExists = await this.userRepository.findOne({ email });
 
     if (userAlreadyExists) {
-      throw new Error("User already exists");
+      throw new ApplicationException("User already exists", 400);
     }
     const user = await this.userRepository.createUser({
       createdAt: new Date().toUTCString(),
@@ -39,6 +40,7 @@ export class CreateUserUseCase
       password: this.hashService.createHash(password),
       email,
     });
+
     return user;
   }
 }

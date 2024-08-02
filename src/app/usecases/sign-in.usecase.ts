@@ -31,6 +31,7 @@ export class SignInUseCase
 
     const token = this.tokenService.generateToken({
       roles: ["USER"],
+      userId: user.userId,
     });
 
     return {

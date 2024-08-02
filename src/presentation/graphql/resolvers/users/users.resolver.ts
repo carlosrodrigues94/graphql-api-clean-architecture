@@ -16,10 +16,11 @@ export class UsersResolver {
     private readonly findManyUsersUseCaseFactory: FindManyUsersUseCaseFactory
   ) {}
 
-  @Authorized(["ADMIN", "MANAGER"])
+  @Authorized(["USER"])
   @Query((_returns) => PaginatedUsersDTO)
   async users(@Args() { registerStatus, ...rest }: QueryUsersArgs) {
     const usecase = this.findManyUsersUseCaseFactory.build();
+
     const { users, pagination } = await usecase.execute({
       data: registerStatus ? { registerStatus } : {},
       pagination: rest,

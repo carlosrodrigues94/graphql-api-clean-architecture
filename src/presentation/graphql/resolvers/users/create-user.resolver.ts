@@ -1,9 +1,10 @@
-import { Args, Mutation, Resolver } from "type-graphql";
+import { Args, Authorized, Mutation, Resolver } from "type-graphql";
 import { UserDTO } from "@/presentation/graphql/dtos/user.dto";
 import { inject, injectable } from "tsyringe";
 import { TYPES } from "@/presentation/factories/types";
 import { CreateUserUseCaseFactory } from "@/presentation/factories/create-user-usecase.factory";
 import { CreateUserArgs } from "../../args/create-user.args";
+import { GraphQLError } from "graphql";
 
 @injectable()
 @Resolver()
@@ -19,14 +20,6 @@ export class CreateUserResolver {
       .build()
       .execute({ ...data });
 
-    return Promise.resolve({
-      createdAt: new Date().toUTCString(),
-      updatedAt: null,
-      deletedAt: null,
-      userName: "John Doe",
-      registerStatus: "UPDATED",
-      userId: "123456",
-      ...result,
-    } as UserDTO);
+    return result;
   }
 }

@@ -15,6 +15,7 @@ import { SignInResolver } from "@/presentation/graphql/resolvers/users/sign-in.r
 import { CreateUserResolver } from "@/presentation/graphql/resolvers/users/create-user.resolver";
 import { PublicUsersResolver } from "@/presentation/graphql/resolvers/users/public-users.resolver";
 import { UsersResolver } from "@/presentation/graphql/resolvers/users/users.resolver";
+import { ApplicationException } from "@/app/errors/application-error";
 
 async function bootstrap() {
   const { container } = makeDependencyInjections();
@@ -34,11 +35,15 @@ async function bootstrap() {
 
   const server = new ApolloServer({
     schema,
+    formatError: (formatted, error) => {
+      return { message: formatted.message };
+    },
   });
   const { url } = await startStandaloneServer(server, {
     listen: {
       port: 4000,
     },
+
     context: async ({ req }) =>
       new ContextMiddleware(knex, knexConfig, JWT).checkUser({ req }),
   });
