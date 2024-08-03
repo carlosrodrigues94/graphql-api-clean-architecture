@@ -1,6 +1,17 @@
 
 provider "aws" {
-  region = var.aws_region
+  region     = var.aws_region
+  access_key = var.aws_iam_access_key
+  secret_key = var.aws_iam_secret_key
+}
+
+terraform {
+
+  backend "s3" {
+    bucket         = "terraform.data"
+    key            = "terraform.tfstate"
+    dynamodb_table = "terraform_lock"
+  }
 }
 
 data "aws_ami" "ubuntu" {
@@ -36,8 +47,9 @@ resource "aws_security_group" "sg_8080" {
   }
 }
 
-resource "aws_instance" "example" {
+resource "aws_instance" "graphql_server_instance" {
   ami                    = data.aws_ami.ubuntu.id
+  count                  = 1
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.sg_8080.id]
   user_data              = <<-EOF
@@ -49,11 +61,31 @@ resource "aws_instance" "example" {
               systemctl restart apache2
               EOF
   tags = {
-    Name = "terraform-learn-state-ec2"
+    Name = "graphql_server_instance_${count.index}"
   }
+}
+
+output "instance_ids" {
+  value = aws_instance.graphql_server_instance[*].id
+}
+
+output "public_ips" {
+  value = aws_instance.graphql_server_instance[*].public_ip
 }
 
 variable "aws_region" {
   description = "The AWS region to create resources in"
   default     = "us-east-1"
+
 }
+
+variable "aws_iam_secret_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "aws_iam_access_key" {
+  type      = string
+  sensitive = true
+}
+

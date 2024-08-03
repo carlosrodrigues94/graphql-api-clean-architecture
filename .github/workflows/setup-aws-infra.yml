@@ -1,0 +1,37 @@
+name: Setup AWS Infra (Terraform)
+
+on:
+  workflow_dispatch:
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    env:
+      TF_VAR_aws_iam_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+      TF_VAR_aws_iam_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+
+    steps:
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: "us-east-1"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+        with:
+          terraform_version: 1.1.7
+
+      - name: Initialize Terraform
+        run: terraform init
+        working-directory: ci
+
+      - name: Plan Terraform
+        run: terraform plan
+        working-directory: ci
+
+      - name: Apply Terraform
+        run: terraform apply -auto-approve
+        working-directory: ci

@@ -1,0 +1,56 @@
+name: Deploy Node.js Application
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy_application:
+    name: Deploy Node.js Application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+
+      - name: Upload Public Key to EC2
+        run: |
+          INSTANCE_ID=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=NodejsAppInstance" "Name=instance-state-name,Values=running" \
+            --query "Reservations[*].Instances[*].InstanceId" \
+            --output text)
+
+          PUBLIC_KEY=$(cat ~/.ssh/id_rsa.pub)
+
+          aws ec2-instance-connect send-ssh-public-key \
+            --instance-id $INSTANCE_ID \
+            --availability-zone $(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[*].Instances[*].Placement.AvailabilityZone" --output text) \
+            --instance-os-user ec2-user \
+            --ssh-public-key "$PUBLIC_KEY"
+
+      - name: Deploy Node.js Application
+        run: |
+          INSTANCE_IP=$(aws ec2 describe-instances \
+            --instance-ids $(aws ec2 describe-instances --filters "Name=tag:Name,Values=NodejsAppInstance" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*].InstanceId" --output text) \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --output text)
+
+          scp -o StrictHostKeyChecking=no -r . ec2-user@$INSTANCE_IP:/home/ec2-user/app
+          ssh -o StrictHostKeyChecking=no ec2-user@$INSTANCE_IP << 'EOF'
+            cd /home/ec2-user/app
+            npm install
+            npm start
+          EOF
