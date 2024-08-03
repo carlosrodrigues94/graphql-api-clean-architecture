@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Generate SSH Key Pair
         id: generate_ssh
@@ -21,13 +21,13 @@ jobs:
           echo "::set-output name=public_key::$(cat ec2-ssh-key.pub)"
 
       - name: Save Private Key as Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ssh-private-key
           path: ec2-ssh-key
 
       - name: Save Public Key as Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ssh-public-key
           path: ec2-ssh-key.pub
@@ -39,16 +39,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Download SSH Key Pair Artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: ssh-private-key
           path: ./ssh-keys
 
       - name: Download Public Key Artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: ssh-public-key
           path: ./ssh-keys
@@ -81,7 +81,7 @@ jobs:
 
     # - name: Save Terraform State
     #   if: always()
-    #   uses: actions/upload-artifact@v2
+    #   uses: actions/upload-artifact@v4
     #   with:
     #     name: terraform-state
     #     path: ./terraform.tfstate
@@ -92,7 +92,7 @@ jobs:
 
   #   steps:
   #     - name: Checkout code
-  #       uses: actions/checkout@v2
+  #       uses: actions/checkout@v4
 
   #     - name: Set up Node.js
   #       uses: actions/setup-node@v2
