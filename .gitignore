@@ -2,3 +2,8 @@ node_modules
 dist
 .vscode
 .env
+
+.github/workflows/ci/.terraform
+.github/workflows/ci/.terraform.lock.hcl
+.github/workflows/ci/terraform.tfstate
+.github/workflows/ci/terraform.tfstate.backup

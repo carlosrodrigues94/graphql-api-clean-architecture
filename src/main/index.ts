@@ -15,7 +15,6 @@ import { SignInResolver } from "@/presentation/graphql/resolvers/users/sign-in.r
 import { CreateUserResolver } from "@/presentation/graphql/resolvers/users/create-user.resolver";
 import { PublicUsersResolver } from "@/presentation/graphql/resolvers/users/public-users.resolver";
 import { UsersResolver } from "@/presentation/graphql/resolvers/users/users.resolver";
-import { ApplicationException } from "@/app/errors/application-error";
 
 async function bootstrap() {
   const { container } = makeDependencyInjections();
