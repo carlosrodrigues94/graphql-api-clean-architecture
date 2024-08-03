@@ -1,61 +1,17 @@
-name: GraphQL Api Clean Architecture
+name: Rollback Infra (Terraform)
 
-on:
-  push:
-    branches: ["main"]
+# on:
+#   push:
+#     branches: ["main"]
 
 jobs:
-  generate_ssh_keys:
-    name: Generate SSH Key Pair
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Generate SSH Key Pair
-        id: generate_ssh
-        run: |
-          ssh-keygen -t rsa -b 4096 -f ec2-ssh-key -N "" -C "github_actions@github.com"
-          echo "::set-output name=private_key::$(cat ec2-ssh-key)"
-          echo "::set-output name=public_key::$(cat ec2-ssh-key.pub)"
-
-      - name: Save Private Key as Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ssh-private-key
-          path: ec2-ssh-key
-
-      - name: Save Public Key as Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ssh-public-key
-          path: ec2-ssh-key.pub
-
   terraform:
     name: Terraform
     runs-on: ubuntu-latest
-    needs: generate_ssh_keys
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Download SSH Key Pair Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: ssh-private-key
-          path: ./ssh-keys
-
-      - name: Download Public Key Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ssh-public-key
-          path: ./ssh-keys
-
-      - name: Set Public Key as Environment Variable
-        id: set_public_key
-        run: echo "PUBLIC_KEY=$(cat ./ssh-keys/ec2-ssh-key.pub)" >> $GITHUB_ENV
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
@@ -64,10 +20,24 @@ jobs:
           terraform_version: 1.1.7
 
       - name: Initialize Terraform
-        env:
-          TF_VAR_public_key: ${{ env.PUBLIC_KEY }}
         run: terraform init
         working-directory: ci
+
+      - name: Initialize Terraform
+        run: terraform init
+        working-directory: ci
+
+      - name: Terraform Destroy
+        run: terraform destroy
+        working-directory: ci
+
+      - name: Save Terraform State
+        if: always()
+        uses: actions/upload-artifact@v4
+        working-directory: ci
+        with:
+          name: terraform-state
+          path: ./terraform.tfstate
 
     # - name: Plan Terraform
     #   env:
