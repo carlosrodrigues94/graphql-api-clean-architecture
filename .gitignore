@@ -3,7 +3,7 @@ dist
 .vscode
 .env
 
-.github/workflows/ci/.terraform
-.github/workflows/ci/.terraform.lock.hcl
-.github/workflows/ci/terraform.tfstate
-.github/workflows/ci/terraform.tfstate.backup
+**/ci/.terraform
+**/ci/.terraform.lock.hcl
+**/ci/terraform.tfstate
+**/ci/terraform.tfstate.backup
