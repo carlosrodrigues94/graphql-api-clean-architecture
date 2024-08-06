@@ -7,7 +7,7 @@
     "skipLibCheck": true,
     "types": ["reflect-metadata"],
     "lib": ["ES2023"],
-    "outDir": "./dist",
+    "outDir": "./dist/src",
     "baseUrl": ".",
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
@@ -15,5 +15,6 @@
     "paths": {
       "@/*": ["./src/*"]
     }
-  }
+  },
+  "include": ["./src"]
 }

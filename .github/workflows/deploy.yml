@@ -11,12 +11,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1
 
       - name: Set up SSH key
@@ -29,7 +28,7 @@ jobs:
       - name: Upload Public Key to EC2
         run: |
           INSTANCE_ID=$(aws ec2 describe-instances \
-            --filters "Name=tag:Name,Values=NodejsAppInstance" "Name=instance-state-name,Values=running" \
+            --filters "Name=tag:Name,Values=graphql_server_instance_0" "Name=instance-state-name,Values=running" \
             --query "Reservations[*].Instances[*].InstanceId" \
             --output text)
 
@@ -44,7 +43,7 @@ jobs:
       - name: Deploy Node.js Application
         run: |
           INSTANCE_IP=$(aws ec2 describe-instances \
-            --instance-ids $(aws ec2 describe-instances --filters "Name=tag:Name,Values=NodejsAppInstance" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*].InstanceId" --output text) \
+            --instance-ids $(aws ec2 describe-instances --filters "Name=tag:Name,Values=graphql_server_instance_0" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*].InstanceId" --output text) \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text)
 

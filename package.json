@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev -r tsconfig-paths/register ./src/main/index.ts",
-    "build": "tsc"
+    "build": "tsc && tsc-alias",
+    "start": "node ./dist/src/main/index.js"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +17,7 @@
     "@types/node": "^20.14.10",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
+    "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.5.3"
   },
