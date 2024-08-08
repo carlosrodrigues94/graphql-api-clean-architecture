@@ -31,7 +31,7 @@ jobs:
         working-directory: ci
 
       - name: Terraform Refresh
-        run: terraform refresh
+        run: terraform refresh -lock=false
         working-directory: ci
 
       - name: Terraform Destroy
