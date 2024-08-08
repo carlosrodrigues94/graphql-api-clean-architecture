@@ -30,6 +30,12 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
+resource "aws_key_pair" "deployer" {
+  key_name   = "terraform-aws-ec2-key"
+  public_key = var.ssh_ec2_public_key
+}
+
+
 resource "aws_security_group" "sg_8080" {
   name = "terraform-learn-state-sg-8080"
   ingress {
@@ -48,18 +54,11 @@ resource "aws_security_group" "sg_8080" {
 }
 
 resource "aws_instance" "graphql_server_instance" {
+  key_name               = aws_key_pair.deployer.key_name
   ami                    = data.aws_ami.ubuntu.id
   count                  = 1
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.sg_8080.id]
-  user_data              = <<-EOF
-              #!/bin/bash
-              apt-get update
-              apt-get install -y apache2
-              sed -i -e 's/80/8080/' /etc/apache2/ports.conf
-              echo "Hello World" > /var/www/html/index.html
-              systemctl restart apache2
-              EOF
   tags = {
     Name = "graphql_server_instance_${count.index}"
   }
@@ -79,6 +78,10 @@ variable "aws_region" {
 
 }
 
+variable "ssh_ec2_public_key" {
+  type      = string
+  sensitive = true
+}
 variable "aws_iam_secret_key" {
   type      = string
   sensitive = true
