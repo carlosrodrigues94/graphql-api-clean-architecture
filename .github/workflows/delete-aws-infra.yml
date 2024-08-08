@@ -30,9 +30,9 @@ jobs:
         run: terraform init
         working-directory: ci
 
-      - name: Terraform Refresh
-        run: terraform refresh
-        working-directory: ci
+      # - name: Terraform Refresh
+      #   run: terraform refresh
+      #   working-directory: ci
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve
