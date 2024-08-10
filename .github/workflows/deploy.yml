@@ -7,10 +7,16 @@ jobs:
   deploy_application:
     name: Deploy Node.js Application
     runs-on: ubuntu-latest
+    env:
+      DOCKER_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ secrets.REPOSITORY_NAME }}:latest
 
     steps:
+      - name: Showing the image
+        run: "echo $DOCKER_IMAGE"
+
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -26,16 +32,13 @@ jobs:
           rolesrole-to-assume: ${{ secrets.AWS_ECR_GITHUB_ROLE }}
 
       - name: Build Docker image
-        run: |
-          docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ secrets.REPOSITORY_NAME }}:latest .
+        run: "docker build -t $DOCKER_IMAGE ."
 
       - name: Tag Docker image
-        run: |
-          docker tag ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ secrets.REPOSITORY_NAME }}:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ secrets.REPOSITORY_NAME }}:latest
+        run: "docker tag $DOCKER_IMAGE $DOCKER_IMAGE"
 
       - name: Push Docker image to ECR
-        run: |
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ secrets.REPOSITORY_NAME }}:latest
+        run: "docker push $DOCKER_IMAGE"
 
       - name: Deploy Docker container on EC2
         uses: appleboy/ssh-action@v1.0.3
@@ -44,7 +47,7 @@ jobs:
           username: ec2-user # Use the appropriate username for your EC2 instance (e.g., ubuntu, ec2-user)
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ secrets.REPOSITORY_NAME }}:latest
+            docker pull $DOCKER_IMAGE
             docker stop $(docker ps -a -q)
             docker rm $(docker ps -a -q)
-            docker run -d -p 80:4000 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ secrets.REPOSITORY_NAME }}:latest
+            docker run -d -p 80:4000 $DOCKER_IMAGE
