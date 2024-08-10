@@ -1,6 +1,6 @@
 variable "repository_name" {
   type        = string
-  description = "the lifecycle policy to be applied to the ECR repo"
+  description = "repository_name"
 }
 
 variable "ssh_ec2_public_key" {
