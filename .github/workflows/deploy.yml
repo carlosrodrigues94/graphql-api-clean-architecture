@@ -8,12 +8,9 @@ jobs:
     name: Deploy Node.js Application
     runs-on: ubuntu-latest
     env:
-      DOCKER_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ secrets.REPOSITORY_NAME }}:latest
+      DOCKER_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ vars.REPOSITORY_NAME  }}:latest
 
     steps:
-      - name: Showing the image
-        run: "echo $DOCKER_IMAGE"
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
