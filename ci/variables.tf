@@ -1,9 +1,3 @@
-# AWS ECR
-variable "lifecycle_policy" {
-  type        = string
-  description = "the lifecycle policy to be applied to the ECR repo"
-}
-
 variable "repository_name" {
   type        = string
   description = "the lifecycle policy to be applied to the ECR repo"
