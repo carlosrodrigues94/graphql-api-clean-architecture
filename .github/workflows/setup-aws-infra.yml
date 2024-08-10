@@ -7,6 +7,7 @@ jobs:
   terraform:
     name: Terraform
     runs-on: ubuntu-latest
+    permissions: write-all
     env:
       TF_VAR_aws_iam_secret_key: ${{ secrets.AWS_SECRET_KEY }}
       TF_VAR_aws_iam_access_key: ${{ secrets.AWS_ACCESS_KEY }}
