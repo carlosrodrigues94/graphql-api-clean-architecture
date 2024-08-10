@@ -38,7 +38,7 @@ jobs:
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ secrets.REPOSITORY_NAME }}:latest
 
       - name: Deploy Docker container on EC2
-        uses: appleboy/ssh-action@v1.0.6
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_PUBLIC_IP }}
           username: ec2-user # Use the appropriate username for your EC2 instance (e.g., ubuntu, ec2-user)
