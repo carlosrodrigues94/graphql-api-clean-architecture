@@ -31,9 +31,9 @@ jobs:
         working-directory: ci
 
       # - name: Terraform Refresh
-      #   run: terraform refresh
-      #   working-directory: ci
+      # run: terraform refresh -loc
+      # working-directory: ci
 
       - name: Terraform Destroy
-        run: terraform destroy -auto-approve
+        run: terraform destroy -auto-approve -lock=false
         working-directory: ci

@@ -37,9 +37,9 @@ jobs:
         working-directory: ci
 
       - name: Plan Terraform
-        run: terraform plan
+        run: terraform plan -lock=false
         working-directory: ci
 
       - name: Apply Terraform
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -lock=false
         working-directory: ci
