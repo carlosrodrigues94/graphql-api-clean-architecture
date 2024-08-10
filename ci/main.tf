@@ -169,10 +169,9 @@ resource "aws_instance" "graphql_instance" {
 
   user_data = <<-EOF
     #!/bin/bash
-    sudo apt-get update
-    sudo apt-get install -y docker.io
-    sudo systemctl start docker
-    sudo systemctl enable docker
+    sudo amazon-linux-extras install docker
+    sudo service docker start
+    sudo usermod -a -G docker ec2-user
   EOF
 
 
