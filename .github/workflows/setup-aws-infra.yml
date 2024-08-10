@@ -3,11 +3,10 @@ name: Setup AWS Infra (Terraform)
 on:
   workflow_dispatch:
 
-permissions:
-  actions: write
-
 jobs:
   terraform:
+    permissions:
+      actions: write
     name: Terraform
     runs-on: ubuntu-latest
     env:
