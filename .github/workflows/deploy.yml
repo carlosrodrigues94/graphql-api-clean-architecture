@@ -37,6 +37,9 @@ jobs:
       - name: Push Docker image to ECR
         run: "docker push $DOCKER_IMAGE"
 
+      - name: EC2 Instance IP
+        run: 'echo "Public IP: ${{ secrets.EC2_PUBLIC_IP }}"'
+
       - name: Deploy Docker container on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
