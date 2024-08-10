@@ -1,0 +1,8 @@
+node_modules
+dist
+ci
+.vscode
+.github
+.git
+.gitignore
+.readme

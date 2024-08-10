@@ -18,12 +18,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1
 
-      # - name: Set up SSH key
-      #   run: |
-      #     mkdir -p ~/.ssh
-      #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-      #     chmod 600 ~/.ssh/id_rsa
-      #     ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: ${{ secrets.AWS_ACCOUNT_ID }}
+          rolesrole-to-assume: ${{ secrets.AWS_ECR_GITHUB_ROLE }}
 
       # - name: Upload Public Key to EC2
       #   run: |
@@ -40,16 +40,16 @@ jobs:
       #       --instance-os-user ec2-user \
       #       --ssh-public-key "$PUBLIC_KEY"
 
-      - name: Deploy Node.js Application
-        run: |
-          INSTANCE_IP=$(aws ec2 describe-instances \
-            --instance-ids $(aws ec2 describe-instances --filters "Name=tag:Name,Values=graphql_server_instance_0" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*].InstanceId" --output text) \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --output text)
+      # - name: Deploy Node.js Application
+      #   run: |
+      #     INSTANCE_IP=$(aws ec2 describe-instances \
+      #       --instance-ids $(aws ec2 describe-instances --filters "Name=tag:Name,Values=graphql_server_instance_0" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*].InstanceId" --output text) \
+      #       --query 'Reservations[*].Instances[*].PublicIpAddress' \
+      #       --output text)
 
-          scp -o StrictHostKeyChecking=no -r . ec2-user@$INSTANCE_IP:/home/ec2-user/app
-          ssh -o StrictHostKeyChecking=no ec2-user@$INSTANCE_IP << 'EOF'
-            cd /home/ec2-user/app
-            npm install
-            npm start
-          EOF
+      #     scp -o StrictHostKeyChecking=no -r . ec2-user@$INSTANCE_IP:/home/ec2-user/app
+      #     ssh -o StrictHostKeyChecking=no ec2-user@$INSTANCE_IP << 'EOF'
+      #       cd /home/ec2-user/app
+      #       npm install
+      #       npm start
+      #     EOF

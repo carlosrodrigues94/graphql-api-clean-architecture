@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev -r tsconfig-paths/register ./src/main/index.ts",
+    "start:dev": "ts-node-dev -r tsconfig-paths/register ./src/main/index.ts",
     "build": "tsc && tsc-alias",
-    "start": "node ./dist/src/main/index.js"
+    "start:prod": "node ./dist/src/main/index.js"
   },
   "keywords": [],
   "author": "",
