@@ -38,3 +38,9 @@ jobs:
       - name: Apply Terraform
         run: terraform apply -auto-approve -lock=false
         working-directory: ci
+
+      - name: Save EC2 IP to GitHub Secret
+        run: |
+          EC2_PUBLIC_IP=$(terraform output -raw ec2_public_ip)
+          echo $EC2_PUBLIC_IP
+          gh secret set EC2_PUBLIC_IP --body "$EC2_PUBLIC_IP" --repo ${{ github.repository }}

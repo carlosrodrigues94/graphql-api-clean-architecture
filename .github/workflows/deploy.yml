@@ -25,31 +25,26 @@ jobs:
           registries: ${{ secrets.AWS_ACCOUNT_ID }}
           rolesrole-to-assume: ${{ secrets.AWS_ECR_GITHUB_ROLE }}
 
-      # - name: Upload Public Key to EC2
-      #   run: |
-      #     INSTANCE_ID=$(aws ec2 describe-instances \
-      #       --filters "Name=tag:Name,Values=graphql_server_instance_0" "Name=instance-state-name,Values=running" \
-      #       --query "Reservations[*].Instances[*].InstanceId" \
-      #       --output text)
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ secrets.REPOSITORY_NAME }}:latest .
 
-      #     PUBLIC_KEY=$(cat ~/.ssh/id_rsa.pub)
+      - name: Tag Docker image
+        run: |
+          docker tag ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ secrets.REPOSITORY_NAME }}:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ secrets.REPOSITORY_NAME }}:latest
 
-      #     aws ec2-instance-connect send-ssh-public-key \
-      #       --instance-id $INSTANCE_ID \
-      #       --availability-zone $(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[*].Instances[*].Placement.AvailabilityZone" --output text) \
-      #       --instance-os-user ec2-user \
-      #       --ssh-public-key "$PUBLIC_KEY"
+      - name: Push Docker image to ECR
+        run: |
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ secrets.REPOSITORY_NAME }}:latest
 
-      # - name: Deploy Node.js Application
-      #   run: |
-      #     INSTANCE_IP=$(aws ec2 describe-instances \
-      #       --instance-ids $(aws ec2 describe-instances --filters "Name=tag:Name,Values=graphql_server_instance_0" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*].InstanceId" --output text) \
-      #       --query 'Reservations[*].Instances[*].PublicIpAddress' \
-      #       --output text)
-
-      #     scp -o StrictHostKeyChecking=no -r . ec2-user@$INSTANCE_IP:/home/ec2-user/app
-      #     ssh -o StrictHostKeyChecking=no ec2-user@$INSTANCE_IP << 'EOF'
-      #       cd /home/ec2-user/app
-      #       npm install
-      #       npm start
-      #     EOF
+      - name: Deploy Docker container on EC2
+        uses: appleboy/ssh-action@v1.0.6
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: ec2-user # Use the appropriate username for your EC2 instance (e.g., ubuntu, ec2-user)
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ secrets.REPOSITORY_NAME }}:latest
+            docker stop $(docker ps -a -q)
+            docker rm $(docker ps -a -q)
+            docker run -d -p 80:4000 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ secrets.REPOSITORY_NAME }}:latest
