@@ -41,6 +41,7 @@ jobs:
         working-directory: ci
 
       - name: Save EC2 IP to GitHub Secret
+        working-directory: ci
         run: |
           EC2_PUBLIC_IP=$(terraform output public_ips)
           echo $EC2_PUBLIC_IP
