@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES6",
+    "lib": ["ES2023"],
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "outDir": "./dist/database",
+    "experimentalDecorators": true
+  },
+  "include": ["./database"],
+  "exclude": ["node_modules"]
+}

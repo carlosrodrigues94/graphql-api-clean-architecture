@@ -13,6 +13,8 @@ jobs:
       TF_VAR_aws_iam_access_key: ${{ secrets.AWS_ACCESS_KEY }}
       TF_VAR_ssh_ec2_public_key: ${{ secrets.AWS_EC2_PUBLIC_KEY }}
       TF_VAR_repository_name: ${{ vars.REPOSITORY_NAME }}
+      TF_VAR_db_user: ${{ secrets.DATABASE_USER }}
+      TF_VAR_db_password: ${{ secrets.DATABASE_PASSWORD }}
 
     steps:
       - name: Set up AWS CLI
@@ -52,5 +54,7 @@ jobs:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           EC2_PUBLIC_IP=$(terraform output public_ips | tr -d '"')
+          AWS_DATABASE_HOST=$(terraform output database_host | tr -d '"')
           echo $EC2_PUBLIC_IP
           gh secret set EC2_PUBLIC_IP --body "$EC2_PUBLIC_IP" --repo ${{ github.repository }}
+          gh secret set DATABASE_URL --body "postgres://$DATABASE_USER:$DATABASE_PASSWORD@$AWS_DATABASE_HOST:5432/postgres"

@@ -1,15 +1,19 @@
 {
-  "name": "code",
+  "name": "graphql-api-clean-architecture",
   "version": "1.0.0",
-  "description": "",
+  "description": "A GraphQL API with Clean Architecture",
   "main": "index.js",
   "scripts": {
     "start:dev": "ts-node-dev -r tsconfig-paths/register ./src/main/index.ts",
     "build": "tsc && tsc-alias",
-    "start:prod": "node ./dist/src/main/index.js"
+    "start:prod": "node ./dist/src/main/index.js",
+    "knex": "knex --knexfile ./database/knex.config.ts",
+    "build:migrations": "tsc --project tsconfig-database.json && tsc-alias",
+    "database:seed:prod": "node ./dist/database/seeds/seed.js",
+    "database:migrations:prod": "knex --knexfile ./dist/database/knex.config.js migrate:latest"
   },
   "keywords": [],
-  "author": "",
+  "author": "carlosrodrigues94",
   "license": "ISC",
   "devDependencies": {
     "@types/express": "^4.17.21",

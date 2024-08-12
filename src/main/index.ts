@@ -19,6 +19,11 @@ import { UsersResolver } from "@/presentation/graphql/resolvers/users/users.reso
 async function bootstrap() {
   const { container } = makeDependencyInjections();
 
+  console.log({
+    TOKEN_KEY: process.env.TOKEN_KEY,
+    DATABASE_URL: encodeURI(process.env.DATABASE_URL),
+  });
+
   const schema = await buildSchema({
     resolvers: [
       UsersResolver,

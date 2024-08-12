@@ -1,10 +1,9 @@
-import { Args, Authorized, Mutation, Resolver } from "type-graphql";
+import { Args, Mutation, Resolver } from "type-graphql";
 import { UserDTO } from "@/presentation/graphql/dtos/user.dto";
 import { inject, injectable } from "tsyringe";
 import { TYPES } from "@/presentation/factories/types";
 import { CreateUserUseCaseFactory } from "@/presentation/factories/create-user-usecase.factory";
 import { CreateUserArgs } from "../../args/create-user.args";
-import { GraphQLError } from "graphql";
 
 @injectable()
 @Resolver()

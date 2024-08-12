@@ -53,7 +53,52 @@ resource "aws_internet_gateway" "graphql_server_internet_gw" {
   }
 }
 
-# 3) Create Route Table
+resource "aws_db_subnet_group" "db_subnet_group" {
+  name       = "db_subnet_group"
+  subnet_ids = [aws_subnet.graphql_server_instance_subnet.id, aws_subnet.graphql_server_instance_subnet_b.id]
+
+  tags = {
+    Name = "db_subnet_group"
+  }
+}
+
+resource "aws_db_parameter_group" "db_parameter_group" {
+  name   = "db-parameter-group"
+  family = "postgres14"
+
+
+  parameter {
+    name         = "max_connections"
+    value        = "100"
+    apply_method = "pending-reboot"
+  }
+
+  tags = {
+    Name = "db_parameter_group"
+  }
+}
+
+resource "aws_db_instance" "graphql_postgres" {
+  identifier           = "graphql-server-postgres"
+  engine               = "postgres"
+  engine_version       = 14
+  instance_class       = "db.t3.micro"
+  allocated_storage    = 20
+  storage_type         = "gp2"
+  username             = var.db_user
+  password             = var.db_password
+  parameter_group_name = aws_db_parameter_group.db_parameter_group.name
+  skip_final_snapshot  = true
+
+  vpc_security_group_ids = [aws_security_group.rds_sg.id]
+  db_subnet_group_name   = aws_db_subnet_group.db_subnet_group.name
+
+  tags = {
+    Name = "graphql_postgres"
+  }
+}
+
+
 resource "aws_route_table" "graphql_server_route_table" {
   vpc_id = aws_vpc.graphql_server_instance_vpc.id
 
@@ -72,10 +117,9 @@ resource "aws_route_table" "graphql_server_route_table" {
   }
 }
 
-# 4) Create Subnet
 resource "aws_subnet" "graphql_server_instance_subnet" {
   vpc_id            = aws_vpc.graphql_server_instance_vpc.id
-  cidr_block        = "10.0.0.0/24"
+  cidr_block        = "10.0.0.0/24" # Based on VPC Range
   availability_zone = "us-east-1a"
   depends_on        = [aws_internet_gateway.graphql_server_internet_gw]
 
@@ -84,7 +128,18 @@ resource "aws_subnet" "graphql_server_instance_subnet" {
   }
 }
 
-# 5) Associate Subnet with Route Table
+resource "aws_subnet" "graphql_server_instance_subnet_b" {
+  vpc_id                  = aws_vpc.graphql_server_instance_vpc.id
+  cidr_block              = "10.0.1.0/24" # Based on VPC Range
+  availability_zone       = "us-east-1b"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "graphql_server_instance_subnet_b"
+  }
+}
+
+
 resource "aws_route_table_association" "graphql_route_table_association" {
   subnet_id      = aws_subnet.graphql_server_instance_subnet.id
   route_table_id = aws_route_table.graphql_server_route_table.id
@@ -133,16 +188,37 @@ resource "aws_security_group" "graphql_instance_sg" {
 
 }
 
-# 7) Assign ENI with IP
+resource "aws_security_group" "rds_sg" {
+  name        = "rds_sg"
+  description = "Allow inbound traffic from EC2 instance on port 5432"
+  vpc_id      = aws_vpc.graphql_server_instance_vpc.id
+
+  ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.graphql_instance_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "rds_sg"
+  }
+}
+
 resource "aws_network_interface" "graphql_server_network_i" {
   subnet_id       = aws_subnet.graphql_server_instance_subnet.id
   private_ips     = ["10.0.0.10"]
   security_groups = [aws_security_group.graphql_instance_sg.id]
 }
 
-# 8) Assign Elastic IP to ENI
 resource "aws_eip" "server_elastic_ip" {
-  vpc                       = true
   network_interface         = aws_network_interface.graphql_server_network_i.id
   associate_with_private_ip = "10.0.0.10"
   depends_on                = [aws_internet_gateway.graphql_server_internet_gw, aws_instance.graphql_instance]
@@ -152,7 +228,6 @@ resource "aws_eip" "server_elastic_ip" {
   }
 }
 
-# IAM role to EC2 to make it possible read ECR images.
 
 resource "aws_iam_role" "ec2_role" {
   name = "ec2_role"
@@ -183,7 +258,6 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
 }
 
 
-# 10) Create Linux Server and Install/Enable Apache2
 resource "aws_instance" "graphql_instance" {
   ami                  = "ami-0947d2ba12ee1ff75"
   instance_type        = "t2.micro"

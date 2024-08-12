@@ -23,3 +23,11 @@ variable "aws_region" {
 
 }
 
+variable "db_password" {
+  description = "DB password"
+}
+
+variable "db_user" {
+  description = "DB User"
+}
+
