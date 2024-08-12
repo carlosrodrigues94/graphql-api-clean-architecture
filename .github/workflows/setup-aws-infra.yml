@@ -57,4 +57,4 @@ jobs:
           AWS_DATABASE_HOST=$(terraform output database_host | tr -d '"')
           echo $EC2_PUBLIC_IP
           gh secret set EC2_PUBLIC_IP --body "$EC2_PUBLIC_IP" --repo ${{ github.repository }}
-          gh secret set DATABASE_URL --body "postgres://$DATABASE_USER:$DATABASE_PASSWORD@$AWS_DATABASE_HOST:5432/postgres"
+          gh secret set DATABASE_URL --body "postgres://$DATABASE_USER:$DATABASE_PASSWORD@$AWS_DATABASE_HOST/postgres"
