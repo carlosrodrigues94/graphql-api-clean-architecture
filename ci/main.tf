@@ -152,15 +152,44 @@ resource "aws_eip" "server_elastic_ip" {
   }
 }
 
+# IAM role to EC2 to make it possible read ECR images.
+
+resource "aws_iam_role" "ec2_role" {
+  name = "ec2_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_role_attachment" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+
+resource "aws_iam_instance_profile" "ec2_instance_profile" {
+  name = "ec2_instance_profile"
+  role = aws_iam_role.ec2_role.name
+}
+
 
 # 10) Create Linux Server and Install/Enable Apache2
 resource "aws_instance" "graphql_instance" {
-  ami               = "ami-0947d2ba12ee1ff75"
-  instance_type     = "t2.micro"
-  availability_zone = "us-east-1a"
-  key_name          = aws_key_pair.deployer.key_name
-
-  # iam_instance_profile = "${aws_iam_instance_profile.EC2-S3_Profile.name}"
+  ami                  = "ami-0947d2ba12ee1ff75"
+  instance_type        = "t2.micro"
+  availability_zone    = "us-east-1a"
+  key_name             = aws_key_pair.deployer.key_name
+  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
 
   network_interface {
     device_index         = 0
