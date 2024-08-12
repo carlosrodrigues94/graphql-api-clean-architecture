@@ -69,4 +69,4 @@ jobs:
             docker pull $DOCKER_IMAGE
             docker stop $(docker ps -a -q)
             docker rm $(docker ps -a -q)
-            docker run -d -p 80:4000 -e TOKEN_KEY=$TOKEN_KEY -e DATABASE_URL=$DATABASE_URL $DOCKER_IMAGE
+            docker run -d -p 80:4000 -e TOKEN_KEY=$TOKEN_KEY -e NODE_ENV=production -e DATABASE_URL=$DATABASE_URL $DOCKER_IMAGE
