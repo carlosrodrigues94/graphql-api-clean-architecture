@@ -1,16 +1,59 @@
-## GraphQL API with Clean Architecture
+## GraphQL API with Clean Architecture 🚀
 
 This api design allows to use graphql implementation without touch on any business rules
 it is possible to implement a Ports and Adapters (Hexagonal) approach as well.
 
-# Technologies
+## Details
 
-[x] GraphQL (Query and Mutations)
-[x] Apollo Server with Type graphql
-[x] tsyringe (Dependency Injection)
-[x] knex (database query builder)
+- <b>Code First Approach</b>: This is a code first implementation of GraphQL.
+- <b>Only necessary LIBS</b>: This project has just necessary libs for use Graphql with code first and clean arch
+- <b>Clean Arch</b>: This Project it's using concepts of clean architecture so, developers are free to change technologies without touch on business rules.
+- <b>Ci</b>: This project implements all the path to deliver the application on a production environment using technologies like: terraform, github actions and aws environment.
 
-[x] App Layer
-[x] Domain Layer
-[x] Infra Layer
-[x] Main Layer
+## 🛠 Technologies Used
+
+- Apollo Server
+- TypeGraphQL
+- TSyringe
+- Express
+- Terraform
+- Knex
+- AWS Environment
+- Github Actions
+
+## 💡 Features
+
+- [Create User]: Create a new User on DB.
+- [Sign In]: Sign In with email and password.
+- [List Users]: List users.
+- [List Users Public]: List users with a public endpoint.
+
+### GitHub Actions Vars
+
+- REPOSITORY_NAME
+
+### GitHub Actions Secrets
+
+- APP_ID= "string"
+- AWS_ACCESS_KEY= "string"
+- AWS_ACCOUNT_ID= "string"
+- AWS_EC2_PRIVATE_KEY= "string"
+- AWS_EC2_PUBLIC_KEY= "string"
+- AWS_ECR_GITHUB_ROLE= "string"
+- AWS_SECRET_KEY= "string"
+- DATABASE_PASSWORD= "string"
+- DATABASE_URL= "string"
+- DATABASE_USER= "string"
+- EC2_PUBLIC_IP= "string"
+- GH_APP_PRIVATE_KEY= "string"
+
+### Actions
+
+- Setup AWS Infra
+- Delete AWS Infra
+- Deploy Application
+
+### Next Steps
+
+- It would be great to improve build time and size with terraform and gh actions
+- Add more aws tools like ELB and ECS to manage containers and working with auto scaling

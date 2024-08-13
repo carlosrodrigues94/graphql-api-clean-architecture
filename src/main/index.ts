@@ -29,7 +29,6 @@ async function bootstrap() {
     ],
     container: { get: (cls) => container.resolve(cls) },
     emitSchemaFile: resolve(__dirname, "..", "..", "graphql/schema.graphql"),
-
     validate: { always: true },
     authChecker,
   });
