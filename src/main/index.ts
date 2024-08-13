@@ -36,16 +36,29 @@ async function bootstrap() {
   const server = new ApolloServer({
     schema,
 
-    formatError: (formatted, err) => {
+    formatError: (formatted, err: any) => {
       const isProgrammatic = formatted.message.includes(
         ApplicationException.name
       );
-      const message = isProgrammatic ? formatted.message : "UNEXPECTED_ERROR";
 
-      return {
-        message,
-        error: isProgrammatic ? err : {},
+      const isProduction = process.env.NODE_ENV;
+
+      const getErrors = () => {
+        const message = isProgrammatic ? formatted.message : "UNEXPECTED_ERROR";
+        if (isProduction && isProgrammatic) {
+          const error = err.errors ? err : {};
+          return {
+            message,
+            error,
+          };
+        }
+
+        return { message: formatted.message, error: err };
       };
+
+      const result = getErrors();
+
+      return result;
     },
   });
   const { url } = await startStandaloneServer(server, {
