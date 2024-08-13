@@ -10,6 +10,8 @@ COPY . .
 RUN npm run build
 RUN npm run build:migrations
 
+RUN chmod 777 /app/graphql/schema.graphql
+
 FROM node:20.15.1-alpine AS production
 
 WORKDIR /app
@@ -19,7 +21,6 @@ RUN npm install --omit=dev
 
 COPY --from=build /app/dist dist
 COPY --from=build /app/graphql dist/graphql
-
 
 
 EXPOSE 4000
