@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY package*.json ./
 RUN npm install
+RUN chmod +x graphql/schema.graphql
 
 COPY . .
 
@@ -18,7 +19,9 @@ COPY package*.json ./
 RUN npm install --omit=dev
 
 COPY --from=build /app/dist dist
-COPY --from=build /app/graphql graphql
+COPY --from=build /app/graphql dist/graphql
+
+
 
 EXPOSE 4000
 
