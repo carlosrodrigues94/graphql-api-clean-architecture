@@ -20,6 +20,7 @@ it is possible to implement a Ports and Adapters (Hexagonal) approach as well.
 - Knex
 - AWS Environment
 - Github Actions
+- Docker
 
 ## 💡 Features
 
