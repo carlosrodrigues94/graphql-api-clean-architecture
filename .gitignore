@@ -3,6 +3,8 @@ dist
 .vscode
 .env
 
+graphql
+
 **/ci/.terraform
 **/ci/.terraform.lock.hcl
 **/ci/terraform.tfstate
