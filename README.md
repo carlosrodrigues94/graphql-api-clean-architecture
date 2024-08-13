@@ -58,3 +58,67 @@ it is possible to implement a Ports and Adapters (Hexagonal) approach as well.
 
 - It would be great to improve build time and size with terraform and gh actions
 - Add more aws tools like ELB and ECS to manage containers and working with auto scaling
+
+### Examples
+
+```graphql
+# Get Users (Public Route)
+query PublicUsers {
+  publicUsers {
+    result {
+      userId
+      registerStatus
+      userName
+      createdAt
+      updatedAt
+      deletedAt
+      avatar {
+        url
+      }
+    }
+  }
+}
+```
+
+```graphql
+# Create User
+mutation CreateUser($email: String!, $password: String!, $name: String!) {
+  createUser(email: $email, password: $password, name: $name) {
+    email
+  }
+}
+```
+
+```graphql
+# Sign In
+mutation SignIn($email: String!, $password: String!) {
+  signIn(email: $email, password: $password) {
+    email
+    token
+  }
+}
+```
+
+```graphql
+# Users (Auth Route)
+query Users($limit: Int!, $offset: Int!, $registerStatus: String) {
+  users(limit: $limit, offset: $offset, registerStatus: $registerStatus) {
+    result {
+      userId
+      registerStatus
+      userName
+      createdAt
+      updatedAt
+      deletedAt
+      avatar {
+        url
+      }
+    }
+    pagination {
+      limit
+      total
+      offset
+    }
+  }
+}
+```
