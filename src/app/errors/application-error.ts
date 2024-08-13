@@ -7,7 +7,7 @@ export class ApplicationException extends Error {
     this.status = statusCode;
 
     Object.defineProperties(this, {
-      message: { value: message, enumerable: true },
+      message: { value: `[${this.name}] - ${message}`, enumerable: true },
     });
   }
 }

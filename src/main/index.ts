@@ -15,14 +15,10 @@ import { SignInResolver } from "@/presentation/graphql/resolvers/users/sign-in.r
 import { CreateUserResolver } from "@/presentation/graphql/resolvers/users/create-user.resolver";
 import { PublicUsersResolver } from "@/presentation/graphql/resolvers/users/public-users.resolver";
 import { UsersResolver } from "@/presentation/graphql/resolvers/users/users.resolver";
+import { ApplicationException } from "@/app/errors/application-error";
 
 async function bootstrap() {
   const { container } = makeDependencyInjections();
-
-  console.log({
-    TOKEN_KEY: process.env.TOKEN_KEY,
-    DATABASE_URL: encodeURI(process.env.DATABASE_URL),
-  });
 
   const schema = await buildSchema({
     resolvers: [
@@ -32,15 +28,23 @@ async function bootstrap() {
       PublicUsersResolver,
     ],
     container: { get: (cls) => container.resolve(cls) },
-    emitSchemaFile: resolve(__dirname, "schema.graphql"),
+    emitSchemaFile: resolve(__dirname, "..", "..", "graphql/schema.graphql"),
     validate: { always: true },
     authChecker,
   });
 
   const server = new ApolloServer({
     schema,
-    formatError: (formatted, error) => {
-      return { message: formatted.message };
+    formatError: (formatted, err) => {
+      const isProgrammatic = formatted.message.includes(
+        ApplicationException.name
+      );
+      const message = isProgrammatic ? formatted.message : "UNEXPECTED_ERROR";
+
+      return {
+        message,
+        error: isProgrammatic ? err : {},
+      };
     },
   });
   const { url } = await startStandaloneServer(server, {
