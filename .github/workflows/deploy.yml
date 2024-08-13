@@ -60,12 +60,10 @@ jobs:
           key: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
           envs: DOCKER_IMAGE,AWS_ACCOUNT_ID,AWS_REGION,DATABASE_URL
           script: |
-            export DOCKER_IMAGE=$DOCKER_IMAGE
             echo "docker version: $(docker -v)"
             echo "docker image: $DOCKER_IMAGE"
             echo "logging with ecr"
             aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-            echo "[containers] \n$(docker ps -a --format "{{.ID}} {{.Image}}")"
             docker pull $DOCKER_IMAGE
             docker stop $(docker ps -a -q)
             docker rm $(docker ps -a -q)
